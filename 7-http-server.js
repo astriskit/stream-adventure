@@ -59,19 +59,23 @@
 // lives.
 
 function port() {
-  return process.argv[2];
+  return parseInt(process.argv[2]); // port number should be an Integer.
 }
 
 function httpServer() {
   let { createServer } = require("http");
-  let upperCaseStream = require("through2")(function(buff, _, next) {
-    this.push(buff.toString().toUpperCase());
-    next();
-  });
   let server = createServer((req, res) => {
     if (req.method === "POST") {
-      req.pipe(res);
+      let upperCaseStream = require("through2")(function(buff, _, next) {
+        this.push(buff.toString().toUpperCase());
+        next();
+      });
+      req.pipe(upperCaseStream).pipe(res);
+    } else {
+      res.end();
     }
   });
   server.listen(port());
 }
+
+httpServer();
