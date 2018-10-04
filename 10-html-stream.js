@@ -20,11 +20,14 @@
 // file lives.
 
 function htmlStream() {
-  let trumpet = require("trumpet")();
-  let upperCaseStream = require("through2")(function(buf, _, next) {
-    this.push(buf.toString().toUpperCase());
+  let trumpetStream = require("trumpet")();
+  let toUpperCase = require("through2")(function(chunk, _, next) {
+    this.push(chunk.toString().toUpperCase());
     next();
   });
-  trumpet.select(".loop").pipe(upperCaseStream);
-  process.stdin.pipe(trumpet).pipe();
+  let loopStream = trumpetStream.createStream(".loud");
+  loopStream.pipe(toUpperCase).pipe(loopStream); // refer containing issue with this comment - https://github.com/nodeschool/discussions/issues/346#issuecomment-293132881
+  process.stdin.pipe(trumpetStream).pipe(process.stdout);
 }
+
+htmlStream();
